@@ -31,7 +31,8 @@ namespace WowUp.WPF.AddonProviders
         private readonly IAnalyticsService _analyticsService;
 
         private readonly AsyncPolicy CircuitBreaker = Policy
-            .Handle<FlurlHttpException>()
+            .Handle<FlurlHttpException>(ex =>
+                ex.Call.Response.StatusCode != System.Net.HttpStatusCode.NotFound)
             .CircuitBreakerAsync(
                 2,
                 TimeSpan.FromMinutes(1),
@@ -214,7 +215,8 @@ namespace WowUp.WPF.AddonProviders
                 DownloadUrl = addon.Url,
                 GameVersion = addon.Patch,
                 Version = addon.Version,
-                ReleaseDate = addon.LastUpdate
+                ReleaseDate = addon.LastUpdate,
+                Dependencies = Enumerable.Empty<AddonSearchResultDependency>()
             };
 
             return new AddonSearchResult
